@@ -1,66 +1,85 @@
 "use client";
 
-import { useColorState } from "@/hooks/useColorState";
-import { generatePalette } from "@/lib/color/engine";
+import { useMemo } from "react";
+import { Sparkles } from "lucide-react";
 import { ColorInput } from "@/components/features/color-generator/ColorInput";
 import { PaletteControls } from "@/components/features/color-generator/PaletteControls";
 import { PaletteDisplay } from "@/components/features/color-generator/PaletteDisplay";
 import { ExportPanel } from "@/components/features/export/ExportPanel";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
+import { useColorState } from "@/hooks/useColorState";
+import { createShade, generatePalette } from "@/lib/color/engine";
+import { getTranslations } from "@/lib/i18n/translations";
+import { cn } from "@/lib/utils/cn";
 
 export default function Home() {
-  const { isClient, config, setConfig, resetConfig } = useColorState();
-
-  // Protect hydration
-  if (!isClient) {
-    return <div className="min-h-screen bg-background" />;
-  }
-
-  const shades = generatePalette(config.baseColor, config.mode);
-
+  const { language } = useLanguage();
+  const isArabic = language === "ar";
+  const t = getTranslations(language);
+  const {
+    config,
+    setConfig,
+    resetConfig,
+    setShadeOverride,
+    clearShadeOverride,
+    clearAllShadeOverrides,
+  } = useColorState();
+  const generatedShades = generatePalette(config.baseColor, config.mode);
+  const shades = useMemo(
+    () =>
+      generatedShades.map((shade) => {
+        const overrideColor = config.shadeOverrides[shade.name];
+        return overrideColor ? createShade(shade.name, overrideColor) ?? shade : shade;
+      }),
+    [config.shadeOverrides, generatedShades]
+  );
+  
+  const activePrefix = config.namingPrefix || "primary";
   return (
-    <>
-      <div className="container mx-auto max-w-6xl px-4 py-8 md:px-6 md:py-12">
-        <div className="mb-10 max-w-2xl">
-          <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-            Design System Generator
-          </h1>
-          <p className="mt-3 text-lg text-muted-foreground">
-            A precise, high-performance color scale creator for engineering teams. Secure, fast, and fully local.
-          </p>
-        </div>
-
-        <div className="grid gap-8 lg:grid-cols-12 lg:gap-12">
-          {/* Controls Sidebar */}
-          <div className="flex flex-col gap-6 lg:col-span-4">
-            <div className="rounded-xl border bg-card p-5 shadow-sm">
-              <ColorInput 
-                value={config.baseColor} 
-                onChange={(c) => setConfig({ baseColor: c })} 
-              />
-            </div>
-            
-            <PaletteControls 
-              mode={config.mode}
-              namingPrefix={config.namingPrefix}
-              onModeChange={(m) => setConfig({ mode: m })}
-              onPrefixChange={(p) => setConfig({ namingPrefix: p })}
+    <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <section id="workspace" className="grid gap-5 xl:grid-cols-[minmax(300px,360px)_minmax(0,1fr)]">
+        <aside className="flex flex-col gap-5 xl:sticky xl:top-24 xl:self-start">
+          <div className="glass-panel px-5 py-5 sm:px-6">
+            <ColorInput
+              value={config.baseColor}
+              onChange={(color) => setConfig({ baseColor: color })}
             />
+          </div>
 
-            <button
-              onClick={resetConfig}
-              className="mt-2 text-sm font-medium text-muted-foreground hover:text-foreground flex self-start"
-            >
-              Reset to Defaults
+          <PaletteControls
+            mode={config.mode}
+            groupName={config.groupName}
+            namingPrefix={config.namingPrefix}
+            onModeChange={(mode) => setConfig({ mode })}
+            onGroupNameChange={(groupName) => setConfig({ groupName })}
+            onPrefixChange={(prefix) => setConfig({ namingPrefix: prefix })}
+          />
+
+          <div className="glass-panel flex items-center justify-between gap-4 px-4 py-4 sm:px-5">
+            <div>
+              <p className="text-sm font-medium text-[var(--foreground)]">{t.page.workspaceState}</p>
+              <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+                {t.page.workspaceCopy}
+              </p>
+            </div>
+            <button type="button" onClick={resetConfig} className="subtle-button whitespace-nowrap">
+              {t.page.reset}
             </button>
           </div>
+        </aside>
 
-          {/* Display & Export Area */}
-          <div className="flex flex-col gap-10 lg:col-span-8">
-            <PaletteDisplay shades={shades} />
-            <ExportPanel shades={shades} prefix={config.namingPrefix || "primary"} />
-          </div>
+        <div className="flex min-w-0 flex-col gap-6">
+          <PaletteDisplay
+            shades={shades}
+            shadeOverrides={config.shadeOverrides}
+            onShadeOverride={setShadeOverride}
+            onClearShadeOverride={clearShadeOverride}
+            onClearAllOverrides={clearAllShadeOverrides}
+          />
+          <ExportPanel shades={shades} prefix={activePrefix} />
         </div>
-      </div>
-    </>
+      </section>
+    </div>
   );
 }
+

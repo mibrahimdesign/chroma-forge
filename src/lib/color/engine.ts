@@ -15,6 +15,8 @@ export interface ColorShade {
   contrastWithBlack: number;
 }
 
+export type ShadeOverrideMap = Partial<Record<string, string>>;
+
 export type GenerationMode = "tailwind" | "perceptual" | "balanced" | "vivid" | "muted";
 
 export const SHADE_NAMES = ["50", "100", "200", "300", "400", "500", "600", "700", "800", "900", "950"];
@@ -34,17 +36,24 @@ export function safeParseColor(input: AnyColor | string): Colord | null {
 /**
  * Normalizes an array of Colords to our standard Shade objects
  */
+export function createShade(name: string, input: AnyColor | string | Colord): ColorShade | null {
+  const color = input instanceof Colord ? input : safeParseColor(input);
+  if (!color) return null;
+
+  return {
+    name,
+    hex: color.toHex(),
+    rgb: color.toRgbString(),
+    hsl: color.toHslString(),
+    isLight: color.isLight(),
+    contrastWithWhite: color.contrast("#ffffff"),
+    contrastWithBlack: color.contrast("#000000"),
+  };
+}
+
 function toShades(colors: Colord[]): ColorShade[] {
   return colors.map((c, i) => {
-    return {
-      name: SHADE_NAMES[i] || `${i * 100}`,
-      hex: c.toHex(),
-      rgb: c.toRgbString(),
-      hsl: c.toHslString(),
-      isLight: c.isLight(),
-      contrastWithWhite: c.contrast("#ffffff"),
-      contrastWithBlack: c.contrast("#000000"),
-    };
+    return createShade(SHADE_NAMES[i] || `${i * 100}`, c)!;
   });
 }
 
