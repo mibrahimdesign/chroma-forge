@@ -109,6 +109,12 @@ export const translations = {
       jsonDesc: "Portable object for pipelines and sync jobs.",
       ts: "TypeScript",
       tsDesc: "Typed token object for internal tooling.",
+      figma: "Figma Tokens",
+      figmaDesc: "Compatible with Figma Tokens Sync plugin.",
+    },
+    themeManager: {
+      title: "Theme Colors",
+      add: "Add Color",
     },
   },
   ar: {
@@ -218,6 +224,12 @@ export const translations = {
       jsonDesc: "كائن قابل للنقل للخطوط والمهام التلقائية.",
       ts: "تايب سكربت",
       tsDesc: "كائن توكنز Typed للأدوات الداخلية.",
+      figma: "فيجما توكنز",
+      figmaDesc: "متوافق مع إضافة Figma Tokens Sync.",
+    },
+    themeManager: {
+      title: "ألوان الثيم",
+      add: "إضافة لون",
     },
   },
 } as const;

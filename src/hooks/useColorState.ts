@@ -7,6 +7,7 @@ import {
 } from "@/lib/security/validation";
 
 export interface ColorConfig {
+  id: string;
   baseColor: string;
   mode: GenerationMode;
   groupName: string;
@@ -14,7 +15,13 @@ export interface ColorConfig {
   shadeOverrides: Partial<Record<string, string>>;
 }
 
-const DEFAULT_CONFIG: ColorConfig = {
+export interface ThemeState {
+  palettes: ColorConfig[];
+  activeId: string;
+}
+
+const DEFAULT_PALETTE: ColorConfig = {
+  id: "primary",
   baseColor: "#3b82f6",
   mode: "tailwind",
   groupName: "Primary Blue",
@@ -22,44 +29,73 @@ const DEFAULT_CONFIG: ColorConfig = {
   shadeOverrides: {},
 };
 
-const STORAGE_KEY = "chroma-forge-config";
-const colorStateListeners = new Set<() => void>();
-let cachedStorageValue: string | null | undefined;
-let cachedConfigSnapshot: ColorConfig = DEFAULT_CONFIG;
+const DEFAULT_STATE: ThemeState = {
+  palettes: [DEFAULT_PALETTE],
+  activeId: "primary",
+};
 
-function emitColorStateChange() {
-  colorStateListeners.forEach((listener) => listener());
+const STORAGE_KEY = "chroma-forge-theme-v2";
+const LEGACY_STORAGE_KEY = "chroma-forge-config"; // Single palette version
+const stateListeners = new Set<() => void>();
+let cachedStorageValue: string | null | undefined;
+let cachedStateSnapshot: ThemeState = DEFAULT_STATE;
+
+function emitStateChange() {
+  stateListeners.forEach((listener) => listener());
 }
 
-function getStoredConfigSnapshot(): ColorConfig {
+function generateId() {
+  return Math.random().toString(36).substring(2, 9);
+}
+
+function getStoredStateSnapshot(): ThemeState {
   if (typeof window === "undefined") {
-    return DEFAULT_CONFIG;
+    return DEFAULT_STATE;
+  }
+
+  try {
+    // Clear legacy single-palette state if it exists
+    if (localStorage.getItem(LEGACY_STORAGE_KEY)) {
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
+    }
+  } catch {
+    // Ignore migration failures
   }
 
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved === cachedStorageValue) {
-      return cachedConfigSnapshot;
+      return cachedStateSnapshot;
     }
 
     cachedStorageValue = saved;
-    cachedConfigSnapshot = saved
-      ? sanitizeStoredColorConfig(JSON.parse(saved) as unknown, DEFAULT_CONFIG)
-      : DEFAULT_CONFIG;
+    if (saved) {
+      const parsed = JSON.parse(saved) as Partial<ThemeState>;
+      if (Array.isArray(parsed.palettes) && parsed.palettes.length > 0) {
+        cachedStateSnapshot = {
+          palettes: parsed.palettes.map(p => sanitizeStoredColorConfig(p as any, DEFAULT_PALETTE) as ColorConfig),
+          activeId: typeof parsed.activeId === "string" ? parsed.activeId : parsed.palettes[0].id,
+        };
+      } else {
+        cachedStateSnapshot = DEFAULT_STATE;
+      }
+    } else {
+      cachedStateSnapshot = DEFAULT_STATE;
+    }
   } catch {
     cachedStorageValue = null;
-    cachedConfigSnapshot = DEFAULT_CONFIG;
+    cachedStateSnapshot = DEFAULT_STATE;
   }
 
-  return cachedConfigSnapshot;
+  return cachedStateSnapshot;
 }
 
-function subscribeToColorState(listener: () => void) {
-  colorStateListeners.add(listener);
+function subscribeToState(listener: () => void) {
+  stateListeners.add(listener);
 
   if (typeof window === "undefined") {
     return () => {
-      colorStateListeners.delete(listener);
+      stateListeners.delete(listener);
     };
   }
 
@@ -72,108 +108,144 @@ function subscribeToColorState(listener: () => void) {
   window.addEventListener("storage", handleStorage);
 
   return () => {
-    colorStateListeners.delete(listener);
+    stateListeners.delete(listener);
     window.removeEventListener("storage", handleStorage);
   };
 }
 
-function persistConfig(nextConfig: ColorConfig) {
-  cachedStorageValue = JSON.stringify(nextConfig);
-  cachedConfigSnapshot = nextConfig;
+function persistState(nextState: ThemeState) {
+  cachedStorageValue = JSON.stringify(nextState);
+  cachedStateSnapshot = nextState;
 
   try {
     localStorage.setItem(STORAGE_KEY, cachedStorageValue);
   } catch {
-    // Ignore storage failures so the generator remains usable.
+    // Ignore storage failures
   }
 }
 
 export function useColorState() {
-  const config = useSyncExternalStore(
-    subscribeToColorState,
-    getStoredConfigSnapshot,
-    () => DEFAULT_CONFIG
-  );
+  const state = useSyncExternalStore(subscribeToState, getStoredStateSnapshot, () => DEFAULT_STATE);
 
-  const setConfig = useCallback((newConfig: Partial<ColorConfig>) => {
-    const updated: ColorConfig = {
-      baseColor: newConfig.baseColor ?? config.baseColor,
-      mode: newConfig.mode ?? config.mode,
-      groupName:
-        newConfig.groupName !== undefined
-          ? sanitizeGroupName(newConfig.groupName)
-          : config.groupName,
-      namingPrefix:
-        newConfig.namingPrefix !== undefined
-          ? sanitizeKey(newConfig.namingPrefix)
-          : config.namingPrefix,
-      shadeOverrides: newConfig.shadeOverrides ?? config.shadeOverrides,
-    };
+  const activePalette = state.palettes.find(p => p.id === state.activeId) || state.palettes[0];
 
-    persistConfig(updated);
-    emitColorStateChange();
-  }, [config]);
-
-  const resetConfig = useCallback(() => {
-    cachedStorageValue = null;
-    cachedConfigSnapshot = DEFAULT_CONFIG;
-
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch {
-      // Ignore storage failures.
+  const setActivePalette = useCallback((id: string) => {
+    if (state.palettes.some(p => p.id === id)) {
+      const updated = { ...state, activeId: id };
+      persistState(updated);
+      emitStateChange();
     }
+  }, [state]);
 
-    emitColorStateChange();
-  }, []);
+  const addPalette = useCallback((baseConfig: Partial<ColorConfig> = {}) => {
+    const newId = generateId();
+    const newPalette: ColorConfig = {
+      ...DEFAULT_PALETTE,
+      ...baseConfig,
+      id: newId,
+      namingPrefix: baseConfig.namingPrefix ? sanitizeKey(baseConfig.namingPrefix) : `color-${state.palettes.length + 1}`,
+      groupName: baseConfig.groupName ? sanitizeGroupName(baseConfig.groupName) : `Color ${state.palettes.length + 1}`,
+      shadeOverrides: {},
+    };
+    
+    const updated = {
+      palettes: [...state.palettes, newPalette],
+      activeId: newId,
+    };
+    
+    persistState(updated);
+    emitStateChange();
+  }, [state]);
+
+  const removePalette = useCallback((id: string) => {
+    if (state.palettes.length <= 1) return; // Prevent removing last palette
+    
+    const filtered = state.palettes.filter(p => p.id !== id);
+    const updated = {
+      palettes: filtered,
+      activeId: state.activeId === id ? filtered[filtered.length - 1].id : state.activeId,
+    };
+    
+    persistState(updated);
+    emitStateChange();
+  }, [state]);
+
+  const updateActivePalette = useCallback((changes: Partial<ColorConfig>) => {
+    const updatedPalettes = state.palettes.map(p => {
+      if (p.id !== state.activeId) return p;
+      return {
+        ...p,
+        baseColor: changes.baseColor ?? p.baseColor,
+        mode: changes.mode ?? p.mode,
+        groupName: changes.groupName !== undefined ? sanitizeGroupName(changes.groupName) : p.groupName,
+        namingPrefix: changes.namingPrefix !== undefined ? sanitizeKey(changes.namingPrefix) : p.namingPrefix,
+      };
+    });
+
+    persistState({ ...state, palettes: updatedPalettes });
+    emitStateChange();
+  }, [state]);
 
   const setShadeOverride = useCallback((shadeName: string, color: string) => {
     const parsedColor = safeParseColor(color);
-    if (!parsedColor) {
-      return;
-    }
+    if (!parsedColor) return;
 
-    const updated: ColorConfig = {
-      ...config,
-      shadeOverrides: {
-        ...config.shadeOverrides,
-        [shadeName]: parsedColor.toHex(),
-      },
-    };
+    const updatedPalettes = state.palettes.map(p => {
+      if (p.id !== state.activeId) return p;
+      return {
+        ...p,
+        shadeOverrides: {
+          ...p.shadeOverrides,
+          [shadeName]: parsedColor.toHex(),
+        },
+      };
+    });
 
-    persistConfig(updated);
-    emitColorStateChange();
-  }, [config]);
+    persistState({ ...state, palettes: updatedPalettes });
+    emitStateChange();
+  }, [state]);
 
   const clearShadeOverride = useCallback((shadeName: string) => {
-    const nextOverrides = { ...config.shadeOverrides };
-    delete nextOverrides[shadeName];
+    const updatedPalettes = state.palettes.map(p => {
+      if (p.id !== state.activeId) return p;
+      const nextOverrides = { ...p.shadeOverrides };
+      delete nextOverrides[shadeName];
+      return { ...p, shadeOverrides: nextOverrides };
+    });
 
-    const updated: ColorConfig = {
-      ...config,
-      shadeOverrides: nextOverrides,
-    };
-
-    persistConfig(updated);
-    emitColorStateChange();
-  }, [config]);
+    persistState({ ...state, palettes: updatedPalettes });
+    emitStateChange();
+  }, [state]);
 
   const clearAllShadeOverrides = useCallback(() => {
-    const updated: ColorConfig = {
-      ...config,
-      shadeOverrides: {},
-    };
+    const updatedPalettes = state.palettes.map(p => {
+      if (p.id !== state.activeId) return p;
+      return { ...p, shadeOverrides: {} };
+    });
 
-    persistConfig(updated);
-    emitColorStateChange();
-  }, [config]);
+    persistState({ ...state, palettes: updatedPalettes });
+    emitStateChange();
+  }, [state]);
+
+  const resetAllState = useCallback(() => {
+    cachedStorageValue = null;
+    cachedStateSnapshot = DEFAULT_STATE;
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {}
+    emitStateChange();
+  }, []);
 
   return {
-    config,
-    setConfig,
-    resetConfig,
+    state,
+    activePalette,
+    setActivePalette,
+    addPalette,
+    removePalette,
+    updateActivePalette,
     setShadeOverride,
     clearShadeOverride,
     clearAllShadeOverrides,
+    resetAllState,
   };
 }

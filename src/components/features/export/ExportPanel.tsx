@@ -8,18 +8,19 @@ import {
   exportScssVars,
   exportTailwind,
   exportTypeScript,
+  exportFigma,
+  ExportPalette,
 } from "@/lib/export/builders";
 import { getTranslations } from "@/lib/i18n/translations";
 import { cn } from "@/lib/utils/cn";
 
 interface ExportPanelProps {
-  shades: ColorShade[];
-  prefix: string;
+  palettes: ExportPalette[];
 }
 
-type ExportType = "css" | "tailwind" | "scss" | "json" | "ts";
+type ExportType = "css" | "tailwind" | "scss" | "json" | "ts" | "figma";
 
-export function ExportPanel({ shades, prefix }: ExportPanelProps) {
+export function ExportPanel({ palettes }: ExportPanelProps) {
   const { language } = useLanguage();
   const t = getTranslations(language);
   const [activeTab, setActiveTab] = useState<ExportType>("css");
@@ -30,23 +31,26 @@ export function ExportPanel({ shades, prefix }: ExportPanelProps) {
     { id: "scss", label: t.export.scss, description: t.export.scssDesc },
     { id: "json", label: t.export.json, description: t.export.jsonDesc },
     { id: "ts", label: t.export.ts, description: t.export.tsDesc },
+    { id: "figma", label: t.export.figma, description: t.export.figmaDesc },
   ];
 
   const codeString = useMemo(() => {
     switch (activeTab) {
       case "tailwind":
-        return exportTailwind(shades, prefix);
+        return exportTailwind(palettes);
       case "scss":
-        return exportScssVars(shades, prefix);
+        return exportScssVars(palettes);
       case "json":
-        return exportJson(shades, prefix);
+        return exportJson(palettes);
       case "ts":
-        return exportTypeScript(shades, prefix);
+        return exportTypeScript(palettes);
+      case "figma":
+        return exportFigma(palettes);
       case "css":
       default:
-        return exportCssVars(shades, prefix);
+        return exportCssVars(palettes);
     }
-  }, [activeTab, prefix, shades]);
+  }, [activeTab, palettes]);
 
   const activeMeta = exportTabs.find((tab) => tab.id === activeTab) ?? exportTabs[0];
   const activePanelId = `export-panel-${activeTab}`;
@@ -131,7 +135,7 @@ export function ExportPanel({ shades, prefix }: ExportPanelProps) {
             </div>
           </div>
           <div className="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-[0.78rem] text-[var(--foreground-inverse)]">
-            {prefix}
+            {palettes.map(p => p.prefix).join(", ")}
           </div>
         </div>
 
