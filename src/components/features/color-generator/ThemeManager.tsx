@@ -85,7 +85,7 @@ export function ThemeManager({
         
         <button
           type="button"
-          onClick={onAdd}
+          onClick={() => onAdd()}
           className="flex items-center gap-1.5 rounded-lg border border-dashed border-[color:var(--line-strong)] px-3 py-2 text-sm font-medium text-[var(--muted-foreground)] transition-colors hover:border-[color:var(--accent-strong)] hover:bg-[color:var(--accent-strong)]/5 hover:text-[var(--foreground)]"
         >
           <Plus className="h-4 w-4" />

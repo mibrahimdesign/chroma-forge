@@ -57,6 +57,7 @@ export function sanitizeLanguageValue(input: string | null): "en" | "ar" | null 
 }
 
 export interface SafeColorConfig {
+  id: string;
   baseColor: string;
   mode: GenerationMode;
   groupName: string;
@@ -85,6 +86,12 @@ export function sanitizeStoredColorConfig(
   }
 
   const candidate = input as Partial<Record<keyof SafeColorConfig, unknown>>;
+  
+  const nextId =
+    typeof candidate.id === "string" && candidate.id.length > 0 && candidate.id.length <= 50
+      ? candidate.id
+      : Math.random().toString(36).substring(2, 9);
+
   const nextBaseColor =
     typeof candidate.baseColor === "string" &&
     isSafeColorString(candidate.baseColor) &&
@@ -108,6 +115,7 @@ export function sanitizeStoredColorConfig(
   const nextShadeOverrides = sanitizeShadeOverrides(candidate.shadeOverrides);
 
   return {
+    id: nextId,
     baseColor: nextBaseColor,
     mode: nextMode,
     groupName: nextGroupName,

@@ -157,7 +157,7 @@ export function ColorInput({ value, onChange }: ColorInputProps) {
               </div>
 
               <div
-                className="min-h-[160px] rounded-xl border border-white/15 shadow-[inset_0_1px_0_rgba(255,255,255,0.26),0_20px_48px_rgba(15,23,42,0.16)]"
+                className="min-h-[160px] rounded-xl border border-white/15 shadow-[var(--shadow-soft)]"
                 style={{
                   background: `linear-gradient(135deg, ${previewHex}, ${colord(previewHex).darken(0.25).toHex()})`,
                 }}
@@ -259,7 +259,7 @@ export function ColorInput({ value, onChange }: ColorInputProps) {
                       className={cn(
                         "h-9 min-w-9 rounded-[10px] border transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                         value.toLowerCase() === swatch.toLowerCase()
-                          ? "border-[var(--accent-strong)] ring-2 ring-[var(--accent-soft)] shadow-[0_18px_40px_rgba(35,91,224,0.16)]"
+                          ? "border-[var(--accent-strong)] ring-2 ring-[var(--accent-soft)] shadow-sm"
                           : "border-white/15 shadow-[var(--shadow-soft)]"
                       )}
                       style={{ backgroundColor: swatch }}
@@ -341,9 +341,9 @@ export function ColorInput({ value, onChange }: ColorInputProps) {
 
 function InfoTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-[color:var(--line)] bg-[var(--surface-float)] px-4 py-3 shadow-[var(--shadow-soft)]">
-      <p className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-[var(--muted-foreground)]">{label}</p>
-      <p className="mt-2 break-all font-mono text-sm text-[var(--foreground)]">{value}</p>
+    <div className="rounded-xl border border-[color:var(--line)] bg-[var(--surface-float)] px-3 py-3 shadow-[var(--shadow-soft)]">
+      <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-[var(--muted-foreground)]">{label}</p>
+      <p className="mt-1 font-mono text-[0.8rem] text-[var(--foreground)]">{value}</p>
     </div>
   );
 }

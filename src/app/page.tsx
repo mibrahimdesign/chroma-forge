@@ -10,7 +10,7 @@ import { ExportPanel } from "@/components/features/export/ExportPanel";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 import { useColorState } from "@/hooks/useColorState";
 import { createShade, generatePalette } from "@/lib/color/engine";
-import { ExportPalette } from "@/lib/export/builders";
+import { ExportPalette } from "@/lib/export/pipeline/types";
 import { getTranslations } from "@/lib/i18n/translations";
 import { cn } from "@/lib/utils/cn";
 
@@ -55,9 +55,9 @@ export default function Home() {
   }, [state.palettes]);
 
   return (
-    <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
-      <section id="workspace" className="grid gap-5 xl:grid-cols-[minmax(300px,360px)_minmax(0,1fr)]">
-        <aside className="flex flex-col gap-5 xl:sticky xl:top-24 xl:self-start">
+    <div className="mx-auto w-full max-w-[1440px] px-4 py-8 sm:px-6 lg:px-8">
+      <section id="workspace" className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
+        <aside className="flex flex-col gap-6 lg:col-span-3 lg:sticky lg:top-8">
           <div className="glass-panel px-5 py-5 sm:px-6">
             <ThemeManager
               palettes={state.palettes}
@@ -97,7 +97,7 @@ export default function Home() {
           </div>
         </aside>
 
-        <div className="flex min-w-0 flex-col gap-6">
+        <div className="flex min-w-0 flex-col gap-8 lg:col-span-9">
           <PaletteDisplay
             shades={shades}
             shadeOverrides={activePalette.shadeOverrides}

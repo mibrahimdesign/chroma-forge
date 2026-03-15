@@ -45,8 +45,8 @@
     --code-bg: #091425;
     --code-fg: #e9f0fb;
     --code-muted: #9cb1cf;
-    --shadow-soft: 0 18px 45px rgba(22, 34, 55, 0.12);
-    --shadow-glass: inset 0 1px 0 rgba(255, 255, 255, 0.48), 0 24px 70px rgba(22, 34, 55, 0.12);
+    --shadow-soft: 0 4px 16px rgba(22, 34, 55, 0.04);
+    --shadow-glass: inset 0 1px 0 rgba(255, 255, 255, 0.48), 0 8px 32px rgba(22, 34, 55, 0.06);
     --blur-panel: 22px;
     --radius-panel: 16px;
     --page-glow-1: rgba(71, 115, 255, 0.24);
@@ -83,8 +83,8 @@
       --code-bg: #08111f;
       --code-fg: #e6eef9;
       --code-muted: #97abca;
-      --shadow-soft: 0 16px 40px rgba(0, 0, 0, 0.4);
-      --shadow-glass: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 28px 84px rgba(0, 0, 0, 0.5);
+      --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.3);
+      --shadow-glass: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 8px 32px rgba(0, 0, 0, 0.4);
       --page-glow-1: rgba(59, 130, 246, 0.2);
       --page-glow-2: rgba(20, 184, 166, 0.14);
       color-scheme: dark;
@@ -123,8 +123,8 @@
     --code-bg: #08111f;
     --code-fg: #e6eef9;
     --code-muted: #97abca;
-    --shadow-soft: 0 16px 40px rgba(0, 0, 0, 0.4);
-    --shadow-glass: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 28px 84px rgba(0, 0, 0, 0.5);
+    --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.3);
+    --shadow-glass: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 8px 32px rgba(0, 0, 0, 0.4);
     --page-glow-1: rgba(59, 130, 246, 0.2);
     --page-glow-2: rgba(20, 184, 166, 0.14);
     color-scheme: dark;

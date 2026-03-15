@@ -101,17 +101,19 @@ export function PaletteDisplay({
         </button>
       </div>
 
-      <div ref={railRef} className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory">
-        {shades.map((shade) => (
-          <ColorCard
-            key={`${shade.name}-${shade.hex}`}
-            shade={shade}
-            isOverridden={Boolean(shadeOverrides[shade.name])}
-            onShadeOverride={onShadeOverride}
-            onClearShadeOverride={onClearShadeOverride}
-            labels={paletteLabels}
-          />
-        ))}
+      <div className="relative mx-[-16px] px-[16px] sm:mx-[-20px] sm:px-[20px] [mask-image:linear-gradient(to_right,transparent,black_20px,black_calc(100%-20px),transparent)] sm:[mask-image:linear-gradient(to_right,transparent,black_40px,black_calc(100%-40px),transparent)]">
+        <div ref={railRef} className="flex gap-4 overflow-x-auto pb-4 pt-2 snap-x snap-mandatory hide-scrollbar">
+          {shades.map((shade) => (
+            <ColorCard
+              key={`${shade.name}-${shade.hex}`}
+              shade={shade}
+              isOverridden={Boolean(shadeOverrides[shade.name])}
+              onShadeOverride={onShadeOverride}
+              onClearShadeOverride={onClearShadeOverride}
+              labels={paletteLabels}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -179,11 +181,11 @@ function ColorCard({
       >
         <div className="space-y-3">
           <div className="space-y-1 transition-transform duration-300 group-hover:-translate-x-1">
-            <p className="font-mono text-[0.82rem] font-medium tracking-[0.04em] opacity-90 break-all data-code">{shade.hex}</p>
-            <p className="text-[0.68rem] font-medium opacity-60 break-words data-code">{shade.rgb}</p>
+            <p className="font-mono text-[0.82rem] font-medium tracking-[0.04em] opacity-90 data-code">{shade.hex}</p>
+            <p className="text-[0.68rem] font-medium opacity-60 data-code">{shade.rgb}</p>
           </div>
 
-          <div className="text-xs font-medium opacity-80 break-words data-code">{shade.hsl}</div>
+          <div className="text-xs font-medium opacity-80 data-code">{shade.hsl}</div>
 
           {hasLowContrast && (
             <div className="inline-flex items-center gap-1.5 rounded-md border border-black/10 bg-white/25 px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] backdrop-blur-md">
@@ -250,7 +252,7 @@ function StatPill({ label, value }: { label: string; value: string }) {
   return (
     <div className="glass-panel-strong px-3.5 py-3">
       <p className="text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-[var(--muted-foreground)]">{label}</p>
-      <p className="mt-2 font-mono text-sm text-[var(--foreground)] break-all">{value}</p>
+      <p className="mt-2 font-mono text-sm text-[var(--foreground)]">{value}</p>
     </div>
   );
 }
