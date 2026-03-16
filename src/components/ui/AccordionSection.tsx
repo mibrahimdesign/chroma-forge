@@ -17,44 +17,55 @@ export function AccordionSection({
   children: React.ReactNode;
 }) {
   return (
-    <div className="glass-panel-strong overflow-hidden transition-all duration-300 shadow-[var(--shadow-soft)] border-[color:var(--line)]">
+    <div className="overflow-hidden rounded-xl border border-[color:var(--line)] bg-[var(--surface-glass-strong)] shadow-[var(--shadow-soft)] transition-all duration-300 backdrop-blur-sm">
+      {/* Accordion Header */}
       <button
         type="button"
         onClick={onToggle}
         aria-expanded={isOpen}
         aria-controls={`${id}-content`}
         className={cn(
-          "flex w-full items-center justify-between p-4 outline-none transition-colors hover:bg-white/[0.02] focus-visible:bg-white/[0.02]",
-          isOpen ? "pb-2" : ""
+          "flex w-full items-center justify-between px-4 outline-none transition-colors hover:bg-white/[0.04] focus-visible:bg-white/[0.04]",
+          isOpen ? "py-3.5 pb-2" : "py-3.5"
         )}
       >
-        <span className="text-[0.8rem] font-bold uppercase tracking-[0.15em] text-[var(--foreground)]">{title}</span>
-        <div className="flex items-center gap-3">
+        {/* Title */}
+        <span className="text-[0.72rem] font-bold uppercase tracking-[0.14em] text-[var(--foreground)]">
+          {title}
+        </span>
+
+        {/* Trailing: badge + chevron */}
+        <div className="flex items-center gap-2">
           {badge && (
-            <span className="rounded-md border border-[color:var(--line)] bg-[var(--surface-float)] px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
+            <span className="rounded-md border border-[color:var(--line)] bg-[var(--surface-float)] px-2 py-[3px] text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-[var(--muted-foreground)]">
               {badge}
             </span>
           )}
           <svg
-            className={cn("h-4 w-4 text-[var(--muted-foreground)] transition-transform duration-300", isOpen ? "rotate-180" : "")}
+            className={cn(
+              "h-3.5 w-3.5 shrink-0 text-[var(--muted-foreground)] transition-transform duration-300",
+              isOpen ? "rotate-180" : ""
+            )}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
+            strokeWidth={2.5}
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
           </svg>
         </div>
       </button>
 
+      {/* Collapsible Content */}
       <div
         id={`${id}-content`}
         className={cn(
-          "grid transition-all duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)]",
+          "grid transition-all duration-[400ms] ease-[cubic-bezier(0.34,1.56,0.64,1)]",
           isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
         )}
       >
         <div className="overflow-hidden">
-          <div className="p-4 pt-1">{children}</div>
+          <div className="px-4 pb-4 pt-1">{children}</div>
         </div>
       </div>
     </div>

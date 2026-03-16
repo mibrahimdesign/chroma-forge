@@ -39,13 +39,13 @@ export function PaletteControls({
   const [openSection, setOpenSection] = useState<"profile" | "name" | "export">("profile");
 
   return (
-    <section aria-labelledby="config-heading" className="space-y-4 overflow-hidden">
-      <div className="space-y-3">
+    <section aria-labelledby="config-heading" className="space-y-0">
+      <div className="mb-6 space-y-2">
         <p className="eyebrow">{t.controls.eyebrow}</p>
         <h2 id="config-heading" className="section-title">
           {t.controls.title}
         </h2>
-        <p className="section-copy">{t.controls.copy}</p>
+        <p className="section-copy text-sm">{t.controls.copy}</p>
       </div>
 
       <div className="flex flex-col gap-2">

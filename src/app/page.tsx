@@ -57,8 +57,9 @@ export default function Home() {
   return (
     <div className="mx-auto w-full max-w-[1440px] px-4 py-8 sm:px-6 lg:px-8">
       <section id="workspace" className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
-        <aside className="flex flex-col gap-6 lg:col-span-3 lg:sticky lg:top-8">
-          <div className="glass-panel px-5 py-5 sm:px-6">
+        <aside className="flex flex-col gap-4 lg:col-span-3 lg:sticky lg:top-8">
+          {/* Theme Colors Pill Bar */}
+          <div className="rounded-xl border border-[color:var(--line)] bg-[var(--surface-glass-strong)] px-4 py-4 shadow-[var(--shadow-soft)] backdrop-blur-sm">
             <ThemeManager
               palettes={state.palettes}
               activeId={state.activeId}
@@ -68,30 +69,35 @@ export default function Home() {
             />
           </div>
 
-          <div className="glass-panel px-5 py-5 sm:px-6">
+          {/* Base Color Controls */}
+          <div className="rounded-2xl border border-[color:var(--line)] bg-[var(--surface-glass)] px-5 py-6 shadow-[var(--shadow-glass)] backdrop-blur-[22px]">
             <ColorInput
               value={activePalette.baseColor}
               onChange={(color) => updateActivePalette({ baseColor: color })}
             />
           </div>
 
-          <PaletteControls
-            mode={activePalette.mode}
-            groupName={activePalette.groupName}
-            namingPrefix={activePalette.namingPrefix}
-            onModeChange={(mode) => updateActivePalette({ mode })}
-            onGroupNameChange={(groupName) => updateActivePalette({ groupName })}
-            onPrefixChange={(prefix) => updateActivePalette({ namingPrefix: prefix })}
-          />
+          {/* Configuration (Generation Profile, Naming, Export) */}
+          <div className="rounded-2xl border border-[color:var(--line)] bg-[var(--surface-glass)] px-5 py-6 shadow-[var(--shadow-glass)] backdrop-blur-[22px]">
+            <PaletteControls
+              mode={activePalette.mode}
+              groupName={activePalette.groupName}
+              namingPrefix={activePalette.namingPrefix}
+              onModeChange={(mode) => updateActivePalette({ mode })}
+              onGroupNameChange={(groupName) => updateActivePalette({ groupName })}
+              onPrefixChange={(prefix) => updateActivePalette({ namingPrefix: prefix })}
+            />
+          </div>
 
-          <div className="glass-panel flex items-center justify-between gap-4 px-4 py-4 sm:px-5">
-            <div>
-              <p className="text-sm font-medium text-[var(--foreground)]">{t.page.workspaceState}</p>
-              <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+          {/* Workspace State Card */}
+          <div className="flex items-center justify-between gap-4 rounded-xl border border-[color:var(--line)] bg-[var(--surface-glass-strong)] px-4 py-3.5 shadow-[var(--shadow-soft)] backdrop-blur-sm">
+            <div className="min-w-0">
+              <p className="text-[0.78rem] font-semibold text-[var(--foreground)]">{t.page.workspaceState}</p>
+              <p className="mt-0.5 text-[0.72rem] text-[var(--muted-foreground)] leading-snug">
                 {t.page.workspaceCopy}
               </p>
             </div>
-            <button type="button" onClick={resetAllState} className="subtle-button whitespace-nowrap">
+            <button type="button" onClick={resetAllState} className="sidebar-btn sidebar-btn-ghost shrink-0 text-[0.72rem]">
               {t.page.reset}
             </button>
           </div>
